@@ -76,7 +76,9 @@ ActiveRecord::ConnectionAdapters::PostgreSQLAdapter.class_eval do
       else
         next unless child.respond_to?(:left) and child.left.respond_to?(:name)
         child_table_name = table_name
-        child_table_name = child.left.relation.name.classify.constantize.table_name if child.left.respond_to?(:relation)
+        if child.left.respond_to?(:relation) && !child.left.relation.is_a?(Arel::Nodes::TableAlias)
+          child_table_name = child.left.relation.name.classify.constantize.table_name
+        end
         if PGCrypto[child_table_name]
           column_options = PGCrypto[child_table_name][child.left.name.to_s]
         else
